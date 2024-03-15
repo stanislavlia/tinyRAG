@@ -1,3 +1,6 @@
 .ipynb_checkpoints
 persistent_storage
 *.sqlite3
+.env
+library
+*.pdf
