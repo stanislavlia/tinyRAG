@@ -1,1 +1,3 @@
 .ipynb_checkpoints
+persistent_storage
+*.sqlite3
