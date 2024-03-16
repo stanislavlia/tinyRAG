@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from rag_base import RetrievalAugmentedGenerator
 import uvicorn
+from pydantic import BaseModel
 
 import math
 
@@ -17,6 +18,7 @@ DB_PORT=8000
 DB_HOST="localhost"
 EMBEDDER_NAME="sentence-transformers/all-MiniLM-L12-v2"
 TOKENIZER_NAME="sentence-transformers/all-MiniLM-L12-v2"
+COLLECTION_NAME="default_collection"
 
 #Start up
 db_client = chromadb.HttpClient(host=DB_HOST,
@@ -34,6 +36,12 @@ app = FastAPI()
 
 print("Sucessfully started...")
 
+class RetrieveQuery(BaseModel):
+    query: str
+    top_k: int
+
+
+
 @app.get("/")
 def home():
     return {
@@ -46,15 +54,10 @@ def home():
     }
 
 @app.post("/retrieve")
-def retrieve(query_data):
+def retrieve(query_data: RetrieveQuery):
+    query_text = query_data.query
+    n_to_retrieve = query_data.top_k
 
-    print(query_data)
-    query_dict = query_data.dict()
-
-    query_text = query_dict["query"]
-    n_to_retrive = int(query_dict["top_k"])
-
-    response = rag.query_with_text(queries=query_text.split("\n"),
-                                   top_k=n_to_retrive)
+    response = rag.query_with_text(queries=query_text.split("\n"), top_k=n_to_retrieve)
     
     return response
