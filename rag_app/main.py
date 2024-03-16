@@ -4,12 +4,13 @@ import os
 from tqdm import tqdm
 from embedding_model import Embedder
 import chromadb
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from rag_base import RetrievalAugmentedGenerator
 import uvicorn
 from pydantic import BaseModel
+import os
 
 import math
 
@@ -61,3 +62,26 @@ def retrieve(query_data: RetrieveQuery):
     response = rag.query_with_text(queries=query_text.split("\n"), top_k=n_to_retrieve)
     
     return response
+
+@app.post("/upload")
+def upload_file(file: UploadFile = File(...)):
+    if file.content_type != 'application/pdf':
+        return {"message": "This endpoint accepts only PDF files."}
+    
+    
+        # Read file content
+    content = file.file.read()  # Directly read without await
+        
+        # Write file to disk
+    with open(file.filename, "wb") as f:
+        f.write(content)
+        
+    print(rag)
+        # Assuming rag.upload_pdf_file is synchronous. If it's inherently async, you'd need to adjust its implementation.
+    rag.upload_pdf_file(path_file=file.filename, batch_size=5)
+        
+        # Make sure to close the file and remove it after processing
+    file.file.close()
+    os.remove(file.filename)
+
+    return {"message": "File added to collection"}

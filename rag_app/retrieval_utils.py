@@ -48,7 +48,7 @@ class PdfChunksLoader_ChromaDB():
         ids_computed = list(docs_ids_map.keys())
         
             
-        existing_chunks_ids = rag.collection.get(ids=ids_computed)["ids"]
+        existing_chunks_ids = self.collection.get(ids=ids_computed)["ids"]
         
         
         def extract_only_new_docs(keyval_tuple):
