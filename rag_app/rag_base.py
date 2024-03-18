@@ -49,13 +49,19 @@ class RetrievalAugmentedGenerator():
         embeddings_tensor = self.embedder.compute_embeddings(queries)
         embeddings_list = embeddings_tensor.tolist()
         
+
+
+        ###TODO
+        ## Make reranking work using the same response schems
         retrived_docs = self.query_with_embeddings(embeddings_list, top_k)
         #query augmentation coming ...
 
         #reranking
         if (use_rerank and self.reranker):
             
-            most_relevant_docs = self.reranker(queries[0], retrived_docs, top_k)
+            print(type(retrived_docs))
+
+            most_relevant_docs = self.reranker.get_most_relevant_chunks(queries[0], retrived_docs, top_k)
             return most_relevant_docs
         
         return retrived_docs

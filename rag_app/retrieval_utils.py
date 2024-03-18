@@ -6,7 +6,7 @@ from embedding_model import Embedder
 import chromadb
 import torch
 import hashlib
-
+import numpy as np
 
 import math
 
@@ -96,7 +96,8 @@ class CrossEncoderReRanker():
         
     def _compute_scores(self, query, documents):
         
-        pairs = [[query, doc.page_content] for doc in documents]
+        #pairs = [[query, doc.page_content] for doc in documents]
+        pairs = [[query, doc] for doc in documents]
         scores = self.cross_encoder.predict(pairs)
         
         return scores

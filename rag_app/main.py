@@ -10,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from rag_base import RetrievalAugmentedGenerator
 from retrieval_utils import CrossEncoderReRanker
 import uvicorn
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from llm_generator import OpenAI_LLMGenerator
 import os
 from openai import OpenAI
@@ -75,6 +75,8 @@ class RetrieveQuery(BaseModel):
 class QA_Query(BaseModel):
     query: str
     top_k: int
+    use_query_augmentation : int = Field(default=0)
+    use_rerank : int = Field(default=0)
 
 
 
@@ -126,8 +128,11 @@ def generate_answer(query_data : QA_Query):
     query_text = query_data.query
     n_to_retrieve = query_data.top_k
 
+
+
     retrieved_chunks = rag.query_with_text(queries=query_text.split("\n"),
-                                            top_k=n_to_retrieve)
+                                            top_k=n_to_retrieve,
+                                            use_rerank=query_data.use_rerank)
     
     response = openai_llm_generator.generate_response(query_text=query_text,
                                                       relevant_chunks=retrieved_chunks)
