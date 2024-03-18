@@ -8,6 +8,7 @@ from fastapi import FastAPI, status, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from rag_base import RetrievalAugmentedGenerator
+from retrieval_utils import CrossEncoderReRanker
 import uvicorn
 from pydantic import BaseModel
 from llm_generator import OpenAI_LLMGenerator
@@ -16,6 +17,9 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv, find_dotenv
 import math
+from sentence_transformers import CrossEncoder
+
+
 
 _ = load_dotenv(find_dotenv())
 
@@ -40,8 +44,7 @@ embedder = Embedder(model_name=EMBEDDER_NAME,
                     tokenizer_name=TOKENIZER_NAME)
 print("Embedding is ready...")
 
-rag = RetrievalAugmentedGenerator(db_client, embedder, "default_collection")
-print("RAG is started...")
+
 
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -51,6 +54,15 @@ openai_llm_generator = OpenAI_LLMGenerator(openai_client=openai_client,
                                            modelname="gpt-3.5-turbo")
 print("LLM generator is ready...")
 
+
+cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+reranker = CrossEncoderReRanker(cross_encoder=cross_encoder)
+print("Reranker is ready...")
+
+rag = RetrievalAugmentedGenerator(db_client, embedder,
+                                   "default_collection",
+                                    reranker=reranker)
+print("RAG is started...")
 
 app = FastAPI()
 print("Sucessfully started...")

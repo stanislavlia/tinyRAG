@@ -13,7 +13,7 @@ import math
 
 
 class RetrievalAugmentedGenerator():
-    def __init__(self, db_client, embedder, collection_name):
+    def __init__(self, db_client, embedder, collection_name, reranker=None):
         
         self.db_client = db_client
         self.embedder = embedder
@@ -23,6 +23,8 @@ class RetrievalAugmentedGenerator():
         
         self.chunk_loader = PdfChunksLoader_ChromaDB(self.collection,
                                                      embedder)
+        
+        self.reranker = reranker
 
     def upload_pdf_file(self, path_file, batch_size=5):
         ##Load chunks by batches
@@ -40,15 +42,23 @@ class RetrievalAugmentedGenerator():
         return self.collection.query(query_embeddings=embeddings,
                                       n_results=top_k)
     
-    def query_with_text(self, queries, top_k):
+    def query_with_text(self, queries, top_k, use_rerank=False):
         
         #compute embeddings
         
         embeddings_tensor = self.embedder.compute_embeddings(queries)
         embeddings_list = embeddings_tensor.tolist()
         
+        retrived_docs = self.query_with_embeddings(embeddings_list, top_k)
+        #query augmentation coming ...
+
+        #reranking
+        if (use_rerank and self.reranker):
+            
+            most_relevant_docs = self.reranker(queries[0], retrived_docs, top_k)
+            return most_relevant_docs
         
-        return self.query_with_embeddings(embeddings_list, top_k)
+        return retrived_docs
     
     
     def get(self, ids, where, limit):

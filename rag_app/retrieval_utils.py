@@ -7,6 +7,7 @@ import chromadb
 import torch
 import hashlib
 
+
 import math
 
 
@@ -89,3 +90,26 @@ class PdfChunksLoader_ChromaDB():
         else:
             print("Documents already exist...")
 
+class CrossEncoderReRanker():
+    def __init__(self, cross_encoder):
+        self.cross_encoder = cross_encoder
+        
+    def _compute_scores(self, query, documents):
+        
+        pairs = [[query, doc.page_content] for doc in documents]
+        scores = self.cross_encoder.predict(pairs)
+        
+        return scores
+    
+    def get_most_relevant_chunks(self, query, documents, n):
+        
+        scores = self._compute_scores(query, documents)
+        sorted_indices = np.argsort(scores)[::-1]
+        
+        relevant_docs = [documents[i] for i in sorted_indices[:n]]
+        
+        return relevant_docs
+        
+        
+    
+    
