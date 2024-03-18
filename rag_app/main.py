@@ -21,7 +21,7 @@ _ = load_dotenv(find_dotenv())
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 DB_PORT=8000
-DB_HOST="localhost"
+DB_HOST="http://0.0.0.0"
 EMBEDDER_NAME="sentence-transformers/all-MiniLM-L12-v2"
 TOKENIZER_NAME="sentence-transformers/all-MiniLM-L12-v2"
 COLLECTION_NAME="default_collection"
@@ -121,3 +121,4 @@ def generate_answer(query_data : QA_Query):
                                                       relevant_chunks=retrieved_chunks)
     
     return response
+
