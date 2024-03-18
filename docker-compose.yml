@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  rag_app:
+    image: stanislavlia/tiny_rag
+    volumes:
+      - ./rag_app/:/app/
+    networks:
+      - net
+    ports:
+      - 8012:8012
+
+  chroma:
+    image: chromadb/chroma
+    volumes:
+      - index_data:/chroma/.chroma/index
+    ports:
+      - 8000:8000
+    networks:
+      - net
+
+volumes:
+  index_data:
+    driver: local
+  backups:
+    driver: local
+
+networks:
+  net:
+    driver: bridge
