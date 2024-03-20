@@ -6,8 +6,8 @@ COPY .  /app
 
 RUN ls -la /app
 
-RUN pip install --no-cache-dir --upgrade  --default-timeout=900 -r requirements.txt
+RUN pip install --no-cache-dir --upgrade --default-timeout=900 -r requirements.txt
 
 WORKDIR /app
 
-#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8012" ]
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80" ]

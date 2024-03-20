@@ -1,3 +1,5 @@
+
+
 version: "3.8"
 services:
   rag_app:
@@ -5,15 +7,24 @@ services:
     volumes:
       - ./rag_app/:/app/
     ports:
-      - 8012:80
+      - 8012:8012
+    depends_on:
+      - chroma
+    networks:
+      - net
+    command: uvicorn main:app --host 0.0.0.0 --port 8012
 
   chroma:
     image: chromadb/chroma
     volumes:
       - index_data:/chroma/.chroma/index
+    
     ports:
       - 8000:8000
-    
+    networks:
+      - net
+
+
 
 volumes:
   index_data:
@@ -21,3 +32,8 @@ volumes:
   backups:
     driver: local
 
+
+networks:
+    net:
+      driver: bridge
+  
