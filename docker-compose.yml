@@ -1,5 +1,4 @@
 
-
 version: "3.8"
 services:
   rag_app:
@@ -19,12 +18,8 @@ services:
     volumes:
       - index_data:/chroma/.chroma/index
     
-    ports:
-      - 8000:8000
     networks:
       - net
-
-
 
 volumes:
   index_data:
