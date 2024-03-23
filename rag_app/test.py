@@ -1,16 +1,22 @@
-
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
+from tqdm import tqdm
 from embedding_model import Embedder
 import chromadb
 from fastapi import FastAPI, status, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from rag_base import RetrievalAugmentedGenerator
 from retrieval_utils import CrossEncoderReRanker
+import uvicorn
 from pydantic import BaseModel, Field
 from llm_generator import OpenAI_LLMGenerator
 import os
 from openai import OpenAI
 import os
 from dotenv import load_dotenv, find_dotenv
+import math
 from sentence_transformers import CrossEncoder
 
 
@@ -19,7 +25,7 @@ _ = load_dotenv(find_dotenv())
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 DB_PORT=8000
-DB_HOST="chroma"
+DB_HOST="localhost" #for test 
 EMBEDDER_NAME="sentence-transformers/all-MiniLM-L12-v2"
 TOKENIZER_NAME="sentence-transformers/all-MiniLM-L12-v2"
 COLLECTION_NAME="default_collection"
@@ -65,6 +71,8 @@ print("Sucessfully started...")
 class RetrieveQuery(BaseModel):
     query: str
     top_k: int
+    use_rerank : int = Field(default=0)
+
 
 class QA_Query(BaseModel):
     query: str
@@ -72,64 +80,7 @@ class QA_Query(BaseModel):
     use_query_augmentation : int = Field(default=0)
     use_rerank : int = Field(default=0)
 
+print(rag.query_with_text("Who is Stanislav Liashkov?", use_rerank=False, top_k=3))
 
 
-@app.get("/")
-def home():
-    return {
-        "Message": "tinyRAG API is running",
-        "Health Check ": "OK",
-        "Version": "0.0.1",
-        "tokenizer" : TOKENIZER_NAME,
-        "embedding_model" : EMBEDDER_NAME,
-
-    }
-
-@app.post("/retrieve")
-def retrieve(query_data: RetrieveQuery):
-    query_text = query_data.query
-    n_to_retrieve = query_data.top_k
-
-    response = rag.query_with_text(queries=query_text.split("\n"), top_k=n_to_retrieve)
-    
-    return response
-
-@app.post("/upload")
-def upload_file(file: UploadFile = File(...)):
-    if file.content_type != 'application/pdf':
-        return {"message": "This endpoint accepts only PDF files."}
-    
-        # Read file content
-    content = file.file.read()  # Directly read without await
-        
-        # Write file to disk
-    with open(file.filename, "wb") as f:
-        f.write(content)
-        
-    print(rag)
-        # Assuming rag.upload_pdf_file is synchronous. If it's inherently async, you'd need to adjust its implementation.
-    rag.upload_pdf_file(path_file=file.filename, batch_size=5)
-        
-        # Make sure to close the file and remove it after processing
-    file.file.close()
-    os.remove(file.filename)
-
-    return {"message": "File added to collection"}
-
-
-@app.post("/ask")
-def generate_answer(query_data : QA_Query):
-    query_text = query_data.query
-    n_to_retrieve = query_data.top_k
-
-
-
-    retrieved_chunks = rag.query_with_text(queries=query_text.split("\n"),
-                                            top_k=n_to_retrieve,
-                                            use_rerank=query_data.use_rerank)
-    
-    response = openai_llm_generator.generate_response(query_text=query_text,
-                                                      relevant_chunks=retrieved_chunks)
-    
-    return response
-
+print("Cross Enocoder: \n\n", rag.query_with_text("Who is Stanislav Liashkov?", use_rerank=True, top_k=3))
