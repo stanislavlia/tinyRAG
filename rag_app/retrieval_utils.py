@@ -94,22 +94,48 @@ class CrossEncoderReRanker():
     def __init__(self, cross_encoder):
         self.cross_encoder = cross_encoder
         
-    def _compute_scores(self, query, documents):
+    def _compute_scores(self, query, chunks_dict):
         
         #pairs = [[query, doc.page_content] for doc in documents]
-        pairs = [[query, doc] for doc in documents]
-        scores = self.cross_encoder.predict(pairs)
-        
-        return scores
+        if (chunks_dict["documents"][0]):
+            pairs = [[query, doc] for doc in chunks_dict["documents"][0]]
+            scores = self.cross_encoder.predict(pairs)
+            return scores #list of scores
+        return []
     
-    def get_most_relevant_chunks(self, query, documents, n):
+    def _get_relevant_chunks_ids(self, query, chunks_dict, n):
         
-        scores = self._compute_scores(query, documents)
+        scores = self._compute_scores(query, chunks_dict)
+
         sorted_indices = np.argsort(scores)[::-1]
+
+        return sorted_indices[:n]
+        #ids_list = chunks_dict["ids"][0]
+
+        # relevant_chunks_ids = ids_list[sorted_indices][:n]
+
+        # return relevant_chunks_ids
+
+    
+    #just dummy echo reranker that does nothing
+    def get_most_relevant_chunks(self, query, chunks_dict, n):
+
+        #super bad for now
+        relevenat_docs_id = self._get_relevant_chunks_ids(query, chunks_dict, n)
+
+        print("relevant docs ", relevenat_docs_id)
+
+        relevant_chunks = dict()
+        relevant_chunks["ids"] = [chunks_dict["ids"][0][relevenat_docs_id]]      
+        relevant_chunks["distances"] = [chunks_dict["distances"][0][relevenat_docs_id]]    
+        relevant_chunks["embeddings"] =  None   
+        relevant_chunks["metadatas"] = [chunks_dict["metadatas"][0][relevenat_docs_id]]
+        relevant_chunks["documents"] = [chunks_dict["documents"][0][relevenat_docs_id]]            
         
-        relevant_docs = [documents[i] for i in sorted_indices[:n]]
+
         
-        return relevant_docs
+
+        return relevant_chunks
         
         
     
