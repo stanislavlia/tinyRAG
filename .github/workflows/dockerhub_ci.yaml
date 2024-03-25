@@ -25,17 +25,12 @@ jobs:
         context: ./rag_app/
         file: ./rag_app/Dockerfile
         push: true
-        tags: stanislavlia/tiny_rag:latest
-
-    # - name: Build and push
-    #     uses: docker/build-push-action@v5
-    #     with:
-    #       context: .
-    #       file: ./Dockerfile
-    #       push: true
-    #       tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:latest
+        tags: ${{ DOCKERHUB_USER }}/${{ DOCKER_IMAGE_NAME}}:latest
+        #tags: stanislavlia/tiny_rag:latest
 
     env:
       DOCKERHUB_USER: stanislavlia
+      DOCKER_IMAGE_NAME: tiny_rag
       DOCKER_CLI_EXPERIMENTAL: enabled
       DOCKER_BUILDKIT: 1
+      
