@@ -8,13 +8,12 @@ from pydantic import BaseModel, Field
 from llm_generator import OpenAI_LLMGenerator
 import os
 from openai import OpenAI
-import os
 from dotenv import load_dotenv, find_dotenv
-
-
 
 _ = load_dotenv(find_dotenv())
 
+
+#CONSTANTS 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 DB_PORT=8000
 DB_HOST="chroma"
@@ -103,20 +102,17 @@ def upload_file(file: UploadFile = File(...)):
     return {"message": "File added to collection"}
 
 
-#DONT USE SO FAR; WORK WITH RETRIEVAL ONLY
-@app.post("/ask")
-def generate_answer(query_data : QA_Query):
-    query_text = query_data.query
-    n_to_retrieve = query_data.top_k
+# @app.post("/ask")
+# def generate_answer(query_data : QA_Query):
+#     query_text = query_data.query
+#     n_to_retrieve = query_data.top_k
 
-
-
-    retrieved_chunks = rag.query_with_text(queries=query_text.split("\n"),
-                                            top_k=n_to_retrieve,
-                                            use_rerank=query_data.use_rerank)
+#     retrieved_chunks = rag.query_with_text(queries=query_text.split("\n"),
+#                                             top_k=n_to_retrieve,
+#                                             use_rerank=query_data.use_rerank)
     
-    response = openai_llm_generator.generate_response(query_text=query_text,
-                                                      relevant_chunks=retrieved_chunks)
+#     response = openai_llm_generator.generate_response(query_text=query_text,
+#                                                       relevant_chunks=retrieved_chunks)
     
-    return response
+#     return response
 
