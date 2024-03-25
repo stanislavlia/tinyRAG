@@ -23,9 +23,9 @@ jobs:
       run: |
         docker buildx create --use
         docker buildx build \
-          --file rag_app/Dockerfile \
           --tag stanislavlia/tiny_rag:latest \
           --push .
+          ./rag_app/
 
     env:
       DOCKERHUB_USER: stanislavlia
