@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ./rag_app/** #Add dependency only on files in app
 
 jobs:
-  build:
+  dockerhub_ci:
     runs-on: ubuntu-latest
 
     steps:
