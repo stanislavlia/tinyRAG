@@ -20,7 +20,8 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_ACCESS_TOKEN }} | docker login -u stanislavlia --password-stdin
 
     - name: Build and push RAG app image to Docker Hub
-      run: docker buildx create --use docker buildx build \
+      run: |
+            docker buildx create --use docker buildx build \
             --file rag_app/Dockerfile \
             --tag stanislavlia/tiny_rag:latest \
             --push .
