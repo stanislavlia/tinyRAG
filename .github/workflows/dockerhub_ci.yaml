@@ -5,7 +5,8 @@ on:
     branches:
       - main
     paths:
-      - ./rag_app/** #Add dependency only on files in app
+      - 'rag_app/**'
+      - '.github/workflows/**'
 
 jobs:
   dockerhub_ci:
