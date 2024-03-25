@@ -12,8 +12,8 @@ import math
 
 
 
-class RetrievalAugmentedGenerator():
-    def __init__(self, db_client, embedder, collection_name, reranker=None):
+class RetrievalAPI():
+    def __init__(self, db_client, embedder, collection_name):
         
         self.db_client = db_client
         self.embedder = embedder
@@ -24,10 +24,8 @@ class RetrievalAugmentedGenerator():
         self.chunk_loader = PdfChunksLoader_ChromaDB(self.collection,
                                                      embedder)
         
-        self.reranker = reranker
 
     def upload_pdf_file(self, path_file, batch_size=5):
-        ##Load chunks by batches
         
         docs = self.chunk_loader._extract_pdf_chunks(path_file)
         
@@ -43,29 +41,12 @@ class RetrievalAugmentedGenerator():
                                       n_results=top_k)
     
     def query_with_text(self, queries, top_k, use_rerank=False):
-        
-        #compute embeddings
-        
+                
         embeddings_tensor = self.embedder.compute_embeddings(queries)
         embeddings_list = embeddings_tensor.tolist()
-        
-
-
-        ###TODO
-        ## Make reranking work using the same response schems
         retrived_docs = self.query_with_embeddings(embeddings_list, top_k)
-        #query augmentation coming ...
 
-        #reranking
-        if (use_rerank and self.reranker):
-            
-            print(type(retrived_docs))
-
-            most_relevant_docs = self.reranker.get_most_relevant_chunks(queries[0], retrived_docs, top_k)
-            return most_relevant_docs
-        
         return retrived_docs
-    
     
     def get(self, ids, where, limit):
         pass

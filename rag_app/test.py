@@ -7,8 +7,7 @@ import chromadb
 from fastapi import FastAPI, status, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from rag_base import RetrievalAugmentedGenerator
-from retrieval_utils import CrossEncoderReRanker
+from rag_base import RetrievalAPI
 import uvicorn
 from pydantic import BaseModel, Field
 from llm_generator import OpenAI_LLMGenerator
@@ -54,14 +53,9 @@ openai_llm_generator = OpenAI_LLMGenerator(openai_client=openai_client,
                                            modelname="gpt-3.5-turbo")
 print("LLM generator is ready...")
 
-
-cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-reranker = CrossEncoderReRanker(cross_encoder=cross_encoder)
-print("Reranker is ready...")
-
-rag = RetrievalAugmentedGenerator(db_client, embedder,
+rag = RetrievalAPI(db_client, embedder,
                                    "default_collection",
-                                    reranker=reranker)
+                                    )
 print("RAG is started...")
 
 app = FastAPI()
@@ -83,4 +77,3 @@ class QA_Query(BaseModel):
 print(rag.query_with_text("Who is Stanislav Liashkov?", use_rerank=False, top_k=3))
 
 
-print("Cross Enocoder: \n\n", rag.query_with_text("Who is Stanislav Liashkov?", use_rerank=True, top_k=3))

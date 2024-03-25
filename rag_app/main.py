@@ -3,15 +3,13 @@ import os
 from embedding_model import Embedder
 import chromadb
 from fastapi import FastAPI, status, File, UploadFile, HTTPException
-from rag_base import RetrievalAugmentedGenerator
-from retrieval_utils import CrossEncoderReRanker
+from rag_base import RetrievalAPI
 from pydantic import BaseModel, Field
 from llm_generator import OpenAI_LLMGenerator
 import os
 from openai import OpenAI
 import os
 from dotenv import load_dotenv, find_dotenv
-from sentence_transformers import CrossEncoder
 
 
 
@@ -48,14 +46,7 @@ openai_llm_generator = OpenAI_LLMGenerator(openai_client=openai_client,
                                            modelname="gpt-3.5-turbo")
 print("LLM generator is ready...")
 
-
-cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-reranker = CrossEncoderReRanker(cross_encoder=cross_encoder)
-print("Reranker is ready...")
-
-rag = RetrievalAugmentedGenerator(db_client, embedder,
-                                   "default_collection",
-                                    reranker=reranker)
+rag = RetrievalAPI(db_client, embedder, "default_collection",)
 print("RAG is started...")
 
 app = FastAPI()
@@ -99,24 +90,20 @@ def upload_file(file: UploadFile = File(...)):
     if file.content_type != 'application/pdf':
         return {"message": "This endpoint accepts only PDF files."}
     
-        # Read file content
-    content = file.file.read()  # Directly read without await
-        
-        # Write file to disk
+    content = file.file.read()
     with open(file.filename, "wb") as f:
         f.write(content)
         
     print(rag)
-        # Assuming rag.upload_pdf_file is synchronous. If it's inherently async, you'd need to adjust its implementation.
     rag.upload_pdf_file(path_file=file.filename, batch_size=5)
         
-        # Make sure to close the file and remove it after processing
     file.file.close()
     os.remove(file.filename)
 
     return {"message": "File added to collection"}
 
 
+#DONT USE SO FAR; WORK WITH RETRIEVAL ONLY
 @app.post("/ask")
 def generate_answer(query_data : QA_Query):
     query_text = query_data.query
