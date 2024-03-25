@@ -35,9 +35,6 @@ embedder = Embedder(model_name=EMBEDDER_NAME,
                     tokenizer_name=TOKENIZER_NAME)
 print("Embedding is ready...")
 
-
-
-
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 openai_llm_generator = OpenAI_LLMGenerator(openai_client=openai_client,
                                            system_promt=SYS_PROMT_GENERATOR,
