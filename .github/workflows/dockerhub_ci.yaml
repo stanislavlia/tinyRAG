@@ -19,13 +19,21 @@ jobs:
     - name: Login to Docker Hub
       run: echo ${{ secrets.DOCKERHUB_ACCESS_TOKEN }} | docker login -u stanislavlia --password-stdin
 
-    - name: Build and push RAG app image to Docker Hub
-      run: |
-        docker buildx create --use \
-        docker buildx build \
-          --tag stanislavlia/tiny_rag:latest \
-          --push . \
-          ./rag_app/
+    - name: "Build app and push to DOCKERHUB"
+      uses: docker/build-push-action@v5
+      with:
+        context: ./rag_app/
+        file: ./rag_app/Dockerfile
+        push: true
+        tags: stanislavlia/tiny_rag:latest
+
+    # - name: Build and push
+    #     uses: docker/build-push-action@v5
+    #     with:
+    #       context: .
+    #       file: ./Dockerfile
+    #       push: true
+    #       tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:latest
 
     env:
       DOCKERHUB_USER: stanislavlia
