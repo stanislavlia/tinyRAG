@@ -13,6 +13,11 @@ import math
 
 
 class RetrievalAPI():
+    """
+        Retrieval API for talking to ChromaDB. 
+        We use it to upload files and query our collections
+    """
+    
     def __init__(self, db_client, embedder, collection_name):
         
         self.db_client = db_client

@@ -3,6 +3,8 @@ import torch
 import torch.nn.functional as F
 
 class Embedder():
+    """Computes embedding for list of strings"""
+
     def __init__(self, model_name, tokenizer_name):
         
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
