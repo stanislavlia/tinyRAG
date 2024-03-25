@@ -21,10 +21,11 @@ jobs:
 
     - name: Build and push RAG app image to Docker Hub
       run: |
-            docker buildx create --use docker buildx build \
-            rag_app/Dockerfile \
-            --tag stanislavlia/tiny_rag:latest \
-            --push .
+        docker buildx create --use
+        docker buildx build \
+          --file rag_app/Dockerfile \
+          --tag stanislavlia/tiny_rag:latest \
+          --push .
 
     env:
       DOCKERHUB_USER: stanislavlia
